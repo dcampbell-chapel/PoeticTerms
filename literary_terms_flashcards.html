@@ -1,0 +1,723 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Literary Terms Flashcards</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.10);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.65);
+      --accent: #7dd3fc;
+      --accent2: #a78bfa;
+      --danger: #fb7185;
+      --good: #34d399;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(900px 520px at 20% 10%, rgba(125, 211, 252, 0.16), transparent 60%),
+        radial-gradient(900px 520px at 80% 0%, rgba(167, 139, 250, 0.14), transparent 55%),
+        radial-gradient(900px 520px at 60% 90%, rgba(52, 211, 153, 0.10), transparent 60%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+    }
+    .app {
+      width: min(980px, 100%);
+      display: grid;
+      gap: 14px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    header .title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    header h1 {
+      font-size: 18px;
+      margin: 0;
+      letter-spacing: .2px;
+    }
+    header .sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 13px;
+      transition: transform .08s ease, background .2s ease, border-color .2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+    .btn:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.20); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary {
+      border-color: rgba(125, 211, 252, 0.35);
+      background: rgba(125, 211, 252, 0.12);
+    }
+    .btn.good {
+      border-color: rgba(52, 211, 153, 0.38);
+      background: rgba(52, 211, 153, 0.12);
+    }
+    .btn.danger {
+      border-color: rgba(251, 113, 133, 0.40);
+      background: rgba(251, 113, 133, 0.12);
+    }
+    .btn.small {
+      padding: 9px 10px;
+      font-size: 12.5px;
+      border-radius: 11px;
+    }
+    .pill {
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.45fr .55fr;
+      gap: 14px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card-wrap {
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      backdrop-filter: blur(10px);
+    }
+    .flashcard {
+      position: relative;
+      height: 420px;
+      border-radius: calc(var(--radius) + 2px);
+      perspective: 1200px;
+      overflow: hidden;
+    }
+    @media (max-width: 520px) {
+      .flashcard { height: 480px; }
+    }
+    .inner {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform .65s cubic-bezier(.2,.85,.2,1);
+    }
+    .flashcard.flipped .inner { transform: rotateY(180deg); }
+    .face {
+      position: absolute;
+      inset: 0;
+      border-radius: calc(var(--radius) + 2px);
+      padding: 18px 18px 16px 18px;
+      backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: radial-gradient(700px 420px at 20% 20%, rgba(125,211,252,0.20), transparent 55%),
+                  radial-gradient(700px 420px at 80% 0%, rgba(167,139,250,0.18), transparent 55%),
+                  rgba(0,0,0,0.20);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+    .face.back {
+      transform: rotateY(180deg);
+      background: radial-gradient(700px 420px at 25% 10%, rgba(52,211,153,0.18), transparent 55%),
+                  radial-gradient(700px 420px at 80% 0%, rgba(125,211,252,0.18), transparent 55%),
+                  rgba(0,0,0,0.20);
+    }
+    .kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .kicker .tag {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.78);
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+    .content {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 6px 10px;
+    }
+    .definition {
+      font-size: clamp(18px, 2.3vw, 28px);
+      line-height: 1.25;
+      font-weight: 720;
+      letter-spacing: .2px;
+    }
+    .term {
+      font-size: clamp(30px, 3.4vw, 44px);
+      line-height: 1.08;
+      font-weight: 860;
+      letter-spacing: .3px;
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--muted);
+      max-width: 70ch;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding-top: 6px;
+    }
+    a.btnlink {
+      text-decoration: none;
+    }
+    .sidebar {
+      border-radius: var(--radius);
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+    .row {
+      display: grid;
+      gap: 8px;
+    }
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+    input[type="text"]::placeholder { color: rgba(255,255,255,0.45); }
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      user-select: none;
+    }
+    .toggle span {
+      font-size: 13px;
+      font-weight: 650;
+      color: rgba(255,255,255,0.80);
+    }
+    .toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+    .stats {
+      display: grid;
+      gap: 8px;
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.78);
+    }
+    .stats b { color: rgba(255,255,255,0.92); }
+    .kbd {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      padding: 2px 6px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.06);
+      border-radius: 6px;
+      color: rgba(255,255,255,0.85);
+    }
+    footer {
+      margin-top: 2px;
+      color: rgba(255,255,255,0.55);
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">
+        <h1>Literary Terms Flashcards</h1>
+        <div class="sub">Front = definition (Column A). Back = term (Column B). Flip with click or <span class="kbd">Space</span>. Navigate with <span class="kbd">←</span>/<span class="kbd">→</span>.</div>
+      </div>
+      <div class="controls">
+        <span class="pill" id="counter">0 / 0</span>
+        <button class="btn small" id="shuffleBtn" title="Shuffle deck (S)">🔀 Shuffle</button>
+        <button class="btn small" id="resetBtn" title="Reset progress">↺ Reset</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card-wrap">
+        <div class="flashcard" id="flashcard" role="button" aria-label="Flashcard. Click to flip.">
+          <div class="inner">
+            <section class="face front" aria-label="Front of card">
+              <div class="kicker">
+                <div class="tag">Definition</div>
+                <div id="frontMeta"></div>
+              </div>
+              <div class="content">
+                <div class="definition" id="frontText"></div>
+                <div class="hint" id="frontHint"></div>
+              </div>
+              <div class="actions">
+                <button class="btn primary" id="flipBtnFront">↻ Flip</button>
+                <button class="btn" id="prevBtnFront">← Prev</button>
+                <button class="btn" id="nextBtnFront">Next →</button>
+              </div>
+            </section>
+
+            <section class="face back" aria-label="Back of card">
+              <div class="kicker">
+                <div class="tag">Term</div>
+                <div id="backMeta"></div>
+              </div>
+              <div class="content">
+                <div class="term" id="backText"></div>
+                <div class="hint" id="backHint"></div>
+              </div>
+              <div class="actions">
+                <a class="btnlink" id="learnMoreLink" href="#" target="_blank" rel="noopener noreferrer">
+                  <button class="btn good" id="learnMoreBtn" type="button">🔎 Learn more</button>
+                </a>
+                <a class="btnlink" id="altLink" href="#" target="_blank" rel="noopener noreferrer">
+                  <button class="btn" id="altBtn" type="button">🌐 Alternate source</button>
+                </a>
+                <button class="btn primary" id="flipBtnBack">↻ Flip</button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="row">
+          <label for="search">Jump to term (filters deck)</label>
+          <input id="search" type="text" placeholder="Type a term… (e.g., metaphor)" autocomplete="off" />
+        </div>
+
+        <div class="toggle" title="When on, only show cards you haven't marked as learned yet.">
+          <span>Study mode (hide learned)</span>
+          <input id="studyMode" type="checkbox" />
+        </div>
+
+        <div class="row">
+          <button class="btn good" id="markLearnedBtn">✅ Mark learned</button>
+          <button class="btn danger" id="unmarkLearnedBtn">🧼 Unmark learned</button>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="row">
+          <button class="btn" id="exportBtn" title="Download learned list as JSON">⬇ Export progress</button>
+          <button class="btn" id="importBtn" title="Import learned list from JSON">⬆ Import progress</button>
+          <input id="importFile" type="file" accept="application/json" hidden />
+        </div>
+
+        <div class="stats">
+          <div><b>Tip:</b> If a LitCharts page doesn&apos;t exist for a term, use <b>Alternate source</b> (Wikipedia search). You can also edit the link targets in the <span class="kbd">cards</span> array in the HTML.</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      Built for classroom use. No external libraries. Progress is saved locally in your browser.
+    </footer>
+  </div>
+
+<script>
+  // ---------- Data ----------
+  const RAW_CARDS = [{"definition": "a figure of speech in which the same sound repeats in a group of words, like \"Bob brought the box of bricks to the basement.\"", "term": "Alliteration"}, {"definition": "an unexplained reference to someone or something outside of the text -- other literary works, famous individuals, historical events, or philosophical ideas -- to layer associations and meanings from these sources onto their own work. Responding to betrayal with a dramatic cry of \"Et tu, Brute?\" (\"You too, Brutus?\"), is an example, referencing a famous line from Shakespeare's Julius Caesar.", "term": "Allusion"}, {"definition": "a comparison that aims to explain a thing or idea by likening it to something else. For example, a career coach might say, \"Being the successful boss or CEO of a company is like being an orchestra conductor: just as the conductor needs to stand up front where everyone -- even the musicians in the back row -- can see him, a good CEO needs to make sure he or she is visible and available to all employees.\"", "term": "Analogy"}, {"definition": "a figure of speech in which the same vowel sound repeats within a group of words. Sucha as, \"Who gave Newt and Scooter the blue tuna? It was too soon!\"", "term": "Assonance"}, {"definition": "the array of emotions and ideas suggested by a word in addition to its dictionary definition. Most words carry meanings, impressions, or associations apart from or beyond their literal meaning. For example, the words \"child\" and \"kid\" mean the same thing, but to call someone a \"kid\" has a slightly informal and therefore disrespectful connotation. The nature of connotations is that they are not explicitly defined, so they can be used in both purposeful and accidental ways to convey subtle meaning or subtext: you might call someone a \"kid\" on purpose to imply some disrespect, or you may do so without realizing the connotation of your words.", "term": "Connotation"}, {"definition": "a writer's unique style of expression, especially his or her choice and arrangement of words. A writer's vocabulary, use of language to produce a specific tone or atmosphere, and ability to communicate clearly with the reader are all essential elements. A writer might also modify his or her __________ to achieve certain effects; at certain moments it might be abstract, concrete, informal, poetic...", "term": "Diction"}, {"definition": "rhymes that occur in the final words of lines of poetry. For instance, these lines from Dorothy Parker's poem \"Interview\" uses this feature: \"The ladies men admire, I've heard, / Would shudder at a wicked word.\"", "term": "End Rhyme"}, {"definition": "a figure of speech in which a writer or speaker exaggerates for the sake of emphasis. They are usually quite obvious exaggerations intended to emphasize a point, rather than be taken literally. For example, when saying \"My backpack weighs a ton,\" the speaker doesn't actually think the backpack weighs a ton, nor does he or she intend the listener to think so. The backpack-wearer simply wants to communicate that he or she is carrying a very heavy load.", "term": "Hyperbole"}, {"definition": "a phrase that conveys a figurative meaning that is difficult or impossible to understand based solely on a literal interpretation of the words in the phrase. For example, saying that something is \"beyond the pale\" is a way of saying that it is improper or \"over the line,\" but you would only know that if someone had explained it to you, or if you had been able to infer its meaning based on context.", "term": "Idiom"}, {"definition": "descriptive language that engages the human senses. For instance, the following lines from Robert Frost's poem \"After Apple-Picking\" engages the senses of touch, movement, and hearing: \"I feel the ladder sway as the boughs bend. / And I keep hearing from the cellar bin / The rumbling sound / Of load on load of apples coming in.\"", "term": "Imagery"}, {"definition": "rhyme that occurs in the middle of lines of poetry, instead of at the ends of lines. I drove myself to the lake / and dove into the water.", "term": "Internal Rhyme"}, {"definition": "when an author places two things side by side as a way of highlighting their differences. Ideas, images, characters, and actions For example, it's a common plot device in fairy tales such as Cinderella to put good-natured main character alongside a cruel step-sibling. The differences between the characters, as well as their close relation to one another, serve to highlight the main character's good qualities.", "term": "Juxtaposition"}, {"definition": "a figure of speech that compares two different things by saying that one thing is the other. The comparisons are not meant to be taken literally. Rather, they create meaning figuratively, making things more relatable, vivid, or expressive. The comparison can be stated explicitly, as in the sentence \"Love is a battlefield.\" Other times, the writer may make this equation between two things implicitly, as in, \"He was wounded by love.\"", "term": "Metaphor"}, {"definition": "the general atmosphere or emotional complexion of a piece of writingâ€”in short, the array of feelings the work evokes in the reader. Every aspect of a piece of writing can influence this, from the setting and the imagery to the author's word choice and tone. For instance, a story that begins \"It was a dark and stormy night\" will probably have an overall dark, ominous, or suspenseful feel.", "term": "Mood"}, {"definition": "a figure of speech in which words evoke the actual sound of the thing they refer to or describe. The boom of a firework exploding, the tick tock of a clock, and the ding dong of a doorbell", "term": "Onomatopoeia"}, {"definition": "a figure of speech in which two contradictory terms or ideas are intentionally paired in order to make a pointâ€”particularly to reveal a deeper or hidden truth. The most recognizable oxymorons are adjective-noun pairs, as in the phrase \"proud humility.\" But they can also occur over the course of a clause or sentence, as in \"That silence after your joke was deafening.\"", "term": "Oxymoron"}, {"definition": "a type of figurative language in which non-human things are described as having human attributes In the sentence, \"The rain poured down on the wedding guests, indifferent to their plans.\" Describing the rain as \"indifferent\" is an example because rain can't be \"indifferent,\" nor can it feel any other human emotion.", "term": "Personification"}, {"definition": "a figure of speech that plays with words that have multiple meanings, or that plays with words that sound similar but mean different things. The comic novelist Douglas Adams uses both types when he writes: \"You can tune a guitar, but you can't tuna fish. Unless of course, you play bass.\" In the first sentence, Adams plays with the similar sounds of \"tune a\" and \"tuna,\" while in the second he plays with the two meanings of the word \"bass\"â€”the musical instrument, and the fish.", "term": "Pun"}, {"definition": "a line or group of lines that regularly repeat, usually at the end of a stanza in a poem or at the end of a verse in a song. In a speech or other prose writing, it can refer to any phrase that repeats a number of times within the text. The repeated phrase \"Quoth the Raven 'Nevermore'\" from Poe's poem \"The Raven\" is a famous example, creating a sense of dread and despair.", "term": "Refrain"}, {"definition": "a figure of speech in which a question is asked for a reason other than to get an answer -- most commonly, it's asked to make a persuasive point. For example, if a person asks, \"How many times do I have to tell you not to eat my dessert?\" he or she does not want to know the exact number of times the request will need to be repeated. Rather, the speaker's goal is to emphasize his or her growing frustration andâ€”ideallyâ€”change the dessert-thief's behavior.", "term": "Rhetorical Question"}, {"definition": "the pattern according to which end rhymes (rhymes located at the end of lines) are repeated in works poetry. abab: \"Roses are red, / Violets are blue. / Shakespeare is dead? / I had no clue.\"", "term": "Rhyme Scheme"}, {"definition": "a figure of speech that directly compares two unlike things. To make the comparison, similes most often use the connecting words \"like\" or \"as,\" but can also use other words that indicate an explicit comparison. In Eleanor Roosevelt's line, \"A woman is like a teabagâ€”you never know how strong she is until she gets in hot water,\" Roosevelt compares two unlike things, women and teabags, to describe how women reveal the full extent of their strength in tough situations.", "term": "Simile"}, {"definition": "a type of rhyme in which two words located at the end of a line of poetry themselves end in similarâ€”but not identicalâ€”consonant sounds. For instance, the words \"pact\" and slicked\" could fit. The term has expanded over time to include additional types of similar sounds. More precisely, slant rhyme today now includes words whose last syllables contain assonance (\"unpack\" and \"detach\") as well as words whose last syllables contain final consonants that have consonance (\"country\" and \"contra\").", "term": "Slant Rhyme"}, {"definition": "a literary device in which a writer uses one thing --usually a physical object or phenomenon--to represent something more abstract. A strong one usually shares a set of key characteristics with whatever it is meant to represent. Characters and events can also fit here. In To Kill a Mockingbird, when Atticus tells his children Jem and Scout that it's a sin to kill a mockingbird because mockingbirds cause no harm to anyone; they just sing. Because of these traits, mockingbirds in the novel represent innocence and beauty, while killing a mockingbird represents an act of senseless cruelty.", "term": "Symbolism"}, {"definition": "a universal idea, lesson, or message explored throughout a work of literature. One key characteristic is their universality, which is to say that they are ideas that not only apply to the specific characters and events of a book or play, but also express broader truths about human experience that readers can apply to their own lives. For instance, John Steinbeck's The Grapes of Wrath (about a family of tenant farmers who are displaced from their land in Oklahoma) is a book that addresses the inhumanity of capitalism, as well as the vitality and necessity of family and friendship.", "term": "Theme"}, {"definition": "the attitude of an author or text towards a certain subject, which might be cheerful or depressive, sarcastic or sincere, comical or mournful, praising or critical, and so on. For instance, an editorial in a newspaper that described its subject as \"not even having the guts to do the job himself,\" is both informal and critical.", "term": "Tone"}, {"definition": "a figure of speech in which something is expressed less strongly than would be expected, or in which something is presented as being smaller, worse, or lesser than it really is. Typically, this device is used to call attention to the very quality it pretends to downplay. For instance, if you had just eaten the most delicious meal of your life and licked the plate clean, you might jokingly tell the chef that \"It was edible\"to humorously express how much you appreciated the meal.", "term": "Understatement"}, {"definition": "when the literal meaning of what someone says is different fromâ€”and often opposite toâ€”what they actually mean. When there's a hurricane raging outside and someone remarks \"what lovely weather we're having\"", "term": "Verbal Irony"}, {"definition": "a figure of speech in which a word or group of words located at the end of one clause or sentence is repeated at or near the beginning of the following clause or sentence. For example, \"Our doubt is our passion, and our passion is our task.\"", "term": "Anadiplosis"}, {"definition": "a figure of speech in which a word or phrase is repeated within a sentence, but the word or phrase means something different each time it appears. In the example, \"We must all hang together, or assuredly we shall all hang separately,\" \"hang\" appears it means \"stay\" or \"stand\" the first time while it refers to being literally \"hanged\" the second time", "term": "Antanaclasis"}, {"definition": "a figure of speech in which a phrase is repeated, but with the order of words reversed. John F. Kennedy's words, for instance: \"Ask not what your country can do for you, ask what you can do for your country\"", "term": "Antimetabole"}, {"definition": "a rhetorical device in which a speaker expresses uncertainty or doubt -- often pretended uncertainty or doubt-- about something, usually as a way of proving a point. Elizabeth Barrett Browning has poem which begins, \"How do I love thee? Let me count the ways.\" Browning's pretense that she might not remember all \"the ways\" is what gives her an opportunity to enumerate them.", "term": "Aporia"}, {"definition": "a figure of speech in which a word or phrase is repeated with a small number of intervening words. The first line of Anna Karenina by Leo Tolstoy, \"Happy families are all alike; every unhappy family is unhappy in its own way.\"", "term": "Diacope"}, {"definition": "a figure of speech in which the beginning of a clause or sentence is repeated at the end of that same clause or sentence, with words intervening. Such as, \"The king is dead, long live the king!\"", "term": "Epanalepsis"}, {"definition": "a figure of speech in which one or more words repeat at the end of successive phrases, clauses, or sentences. In his Gettysburg Address, Abraham Lincoln urged the American people to ensure that, \"government of the people, by the people, for the people,shall not perish from the earth.\"", "term": "Epistrophe"}, {"definition": "a figure of speech in which a word or phrase is repeated in immediate succession, with no intervening words. In the play Hamlet, when Hamlet responds to a question about what he's reading by saying \"Words, words, words\"", "term": "Epizeuxis"}, {"definition": "a type of figurative language in which an object or concept is referred to not by its own name, but instead by the name of something closely associated with it. For example, in \"Wall Street prefers lower taxes,\" the New York City street that was the original home of the New York Stock Exchange stands in for the entire American financial industry.", "term": "Metonymy"}, {"definition": "a figure of speech that involves the repetition of words derived from the same root (such as \"blood\" and \"bleed\"). For instance, the question, \"Who shall watch the watchmen?\" is an example because it includes both \"watch\" and \"watchmen.\"", "term": "Polyptoton"}, {"definition": "a figure of speech in which, most often, a part of something is used to refer to its whole. \"Faces in the crowd\" refers to the people in the crowd; \"Mouths to feed\" refers to a group of hungry people", "term": "Synecdoche"}, {"definition": "a figure of speech in which one \"governing\" word or phrase modifies two distinct parts of a sentence. Often, the governing word will mean something different when applied to each part. In the sentence, \"He took his coat and his vacation,\" the verb \"to take\" makes sense with and governs both \"coat\" and \"vacation,\" but is appropriate to each in a different way.", "term": "Zeugma"}, {"definition": "a figure of speech in which words repeat at the beginning of successive clauses, phrases, or sentences. As in MLK's speech: \"So let freedom ring from the prodigious hilltops of New Hampshire. Let freedom ring from the mighty mountains of New York. Let freedom ring from the heightening Alleghenies of Pennsylvania...\"", "term": "Anaphora"}, {"definition": "a figure of speech that juxtaposes two contrasting or opposing ideas, usually within parallel grammatical structures. For instance, Neil Armstrong said, \"That's one small step for a man, one giant leap for mankind.\" The two halves of the sentence mirror each other in grammatical structure, while together the two halves emphasize the incredible contrast between the individual experience of taking an ordinary step, and the extraordinary progress that Armstrong's step symbolized for the human race.", "term": "Antithesis"}, {"definition": "a figure of speech in which a speaker directly addresses someone (or something) that is not present or cannot respond in reality. The entity being addressed can be an absent, dead, or imaginary person, but it can also be an inanimate object (like stars or the ocean), an abstract idea (like love or fate), or a being (such as a Muse or god): \"O Romeo, Romeo, wherefore art thou Romeo?\" (Shakespeare) / \"Death, be not proud\" (Donne)", "term": "Apostrophe"}, {"definition": "a figure of speech in which coordinating conjunctions -- words such as \"and\", \"or\", and \"but\" that join other words or clauses in a sentence into relationships of equal importance-- are omitted. It can speed up the rhythm of a phrase, make it more memorable or urgent, or offer other stylistic effects. For instance, take the sentence: \"I expect my dog to chew my pillows, my cat to claw my furniture.\" Here, the writer omits the \"and\" from between \"pillows\" and \"my\". This omission transforms the sentence from one that merely states what the pets often do, to one that implies exasperation as well as a fatalistic sense that the pets' actions are inevitable and unchangeable.", "term": "Asyndeton"}, {"definition": "a combination of words that sound harsh or unpleasant together, usually because they pack a lot of percussive or \"explosive\" consonants (like T, P, or K) into relatively little space. For instance, \"He grunted and in a gruff voice said, 'Give me that trash and I'll throw it out!'\"", "term": "Cacophony"}, {"definition": "a pause that occurs within a line of poetry, usually marked by some form of punctuation such as a period, comma, ellipsis, or dash. It doesn't have to be placed in the exact middle of a line of poetry. In the following line from the prologue of Romeo and Juliet, for instance: \"In fair Verona, where we lay our scene.\"", "term": "Caesura"}, {"definition": "a figure of speech in which the grammar of one phrase is inverted in the following phrase, such that two key concepts from the original phrase reappear in the second phrase in inverted order: E.g. \"She has all my love; my heart belongs to her.\"", "term": "Chiasmus"}, {"definition": "a figure of speech in which successive words, phrases, clauses, or sentences are arranged in ascending order of importance. As in \"Look! Up in the sky! It's a bird! It's a plane! It's Superman!\"", "term": "Climax (Figure of Speech)"}, {"definition": "the use of informal words or phrases in writing or speech. They are usually defined in geographical terms, meaning that they are often defined by their use within a dialect. They can include aphorisms, idioms, profanity, or other words. For example,\"You're not gonna change any of them by talkin' right, they got to want to learn themselves...\" (TKAM, Harper Lee)'", "term": "Colloquialism"}, {"definition": "a figure of speech in which the same consonant sound repeats within a group of words. An example is: \"Traffic figures, on July Fourth, to be tough.\"", "term": "Consonance"}, {"definition": "the continuation of a sentence or clause across a line break. For example, the poet John Donne uses this device in his poem \"The Good-Morrow\" when he continues the opening sentence across the line break between the first and second lines: \"I wonder, by my troth, what thou and I / Did, till we loved? Were we not weaned till then?\"", "term": "Enjambment"}, {"definition": "a short quotation, phrase, or poem that is placed at the beginning of another piece of writing to encapsulate that work's main themes and to set the tone. For instance, Mary Shelley's Frankenstein starts with a quote from Milton's Paradise Lost, and establishes the book's main theme \"Did I request thee, Maker, from my clay / To mould me Man, did I solicit thee / From darkness to promote me?\"", "term": "Epigraph"}, {"definition": "the combining of words that sound pleasant together or are easy to pronounce, usually because they contain lots of consonants with soft or muffled sounds (like L, M, N, and R) instead of consonants with harsh, percussive sounds (like T, P, and K). Other factors, like rhyme and rhythm, can also be used to create euphony. Shakespeare's famous \"Sonnet 18,\" which goes \"So long as men can breathe, or eyes can see, / So long lives this, and this gives life to thee.\"", "term": "Euphony"}, {"definition": "a metaphor that unfolds across multiple lines or even paragraphs of a text, making use of multiple interrelated metaphors within an overarching one. So while \"life is a highway\" is a simple metaphor, it becomes this feature when you say: \"Life is a highway that takes us through green pastures, vast deserts, and rocky mountains. Sometimes your car breaks down or you run out of gas, and sometimes you get lost. Friends are the roadmaps that help you get where you're going.\" Now you've spread the idea of \"life = highway\" across multiple sentences and related ideas, and created an extended metaphor.", "term": "Extended Metaphor"}, {"definition": "a figure of speech and a form of understatement in which a sentiment is expressed ironically by negating its contrary. For example, saying \"It's not the best weather today\" during a hurricane would be an example, implying that the weather is, in fact, horrible.", "term": "Litotes"}, {"definition": "a regular pattern of stressed and unstressed syllables that defines the rhythm of some poetry. These stress patterns are defined in groupings, called feet, of two or three syllables. The type and number of repeating feet in each line of poetry define that line's meter. For example, Shakespeare writes in iambic pentameter", "term": "Meter"}, {"definition": "an element or idea that recurs throughout a work of literature. Often collections of related symbols, they help develop the central themes of a book or play. For example, one of the central themes in Romeo and Juliet is that love is a paradox containing many contradictions. As part of developing this theme, Shakespeare describes the experience of love by pairing contradictory, opposite symbols next to each other throughout the play, such as night and day, moon and sun, crows and swans. All of these paired symbols fall into a broader pattern of \"dark vs. light,\" and that broader pattern is called a _________.", "term": "Motif"}, {"definition": "a figure of speech that seems to contradict itself, but which, upon further examination, contains some kernel of truth or reason. Oscar Wilde's famous declaration that \"Life is much too important to be taken seriously\" is a paradox. At first it seems contradictory because important things are meant to be taken seriously, but Wilde's suggestion is that, the more important something is, the more important it is not to take it seriously.", "term": "Paradox"}, {"definition": "a figure of speech in which two or more elements of a sentence (or series of sentences) have the same grammatical structure. These similar elements can be used to intensify the rhythm of language, or to draw a comparison, emphasize, or elaborate on an idea. Give a man a fish, and you feed him for a day. Teach a man to fish, and you feed him for a lifetime. The grammatical structures of the first and second sentences mirror each other.", "term": "Parallelism"}, {"definition": "a work that mimics the style of another work, artist, or genre in an exaggerated way, usually for comic effect. They can take many forms, including fiction, poetry, film, visual art, and more. For instance, Scary Movie and its many sequels are films that mimic the conventions of the horror film genre.", "term": "Parody"}, {"definition": "when a writer attributes human emotions to things that aren't human, such as objects, weather, or animals. It is often used to make the environment reflect the inner experience of a narrator or other characters. For example, if a writer mourning the death of a loved one writes that \"the flowers on the grave drooped in sadness,\" since the flowers do not, in fact, feel sad.", "term": "Pathetic Fallacy"}, {"definition": "a figure of speech in which coordinating conjunctions --words such as \"and,\" \"or,\" and \"but\" that join other words or clauses in a sentence into relationships of equal importance -- are used several times in close succession, particularly where conjunctions would normally not be present at all. \"We ate roast beef and squash and biscuits and potatoes and corn and cheese and cherry pie.\"", "term": "Polysyndeton"}, {"definition": "a figure of speech in which a hissing sound is created within a group of words through the repetition of \"s\" sounds. Sadly, Sam sold seven venomous serpents to Sally and Cyrus in San Francisco.", "term": "Sibilance"}, {"definition": "a rhetorical device that uses a series of three parallel words, phrases, or clauses, often to emphasize a point or create a memorable effect. It's also known as the \"rule of three.\" Government of the people, by the people, for the people - Abraham Lincoln / \"Life, liberty, and the pursuit of happiness\" - The Declaration of Independence / \"Veni, vidi, vici\" (I came, I saw, I conquered) - Julius Caesar", "term": "Tricolon"}];
+
+  // ---------- Helpers ----------
+  function slugifyTerm(term) {
+    // Best-effort slug for LitCharts (works for most terms like "Extended Metaphor" -> "extended-metaphor")
+    return term
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[’']/g, "")            // remove apostrophes
+      .replace(/[^a-z0-9]+/g, "-")     // non-alnum -> hyphen
+      .replace(/^-+|-+$/g, "")         // trim hyphens
+      .replace(/-+/g, "-");
+  }
+
+  function litchartsUrlFor(term) {
+    const slug = slugifyTerm(term);
+    return `https://www.litcharts.com/literary-devices-and-terms/${slug}`;
+  }
+
+  function altUrlFor(term) {
+    // Credible-ish fallback: Wikipedia search query for the term with "literary device"
+    const q = encodeURIComponent(term + " literary device");
+    return `https://en.wikipedia.org/w/index.php?search=${q}`;
+  }
+
+  function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+
+  // ---------- State ----------
+  const STORAGE_KEY = "lit_terms_flashcards_v1";
+  const PROGRESS_KEY = "lit_terms_flashcards_progress_v1";
+
+  let deck = [];
+  let filtered = [];
+  let idx = 0;
+  let learned = new Set();
+  let studyMode = false;
+
+  // ---------- DOM ----------
+  const flashcardEl = document.getElementById("flashcard");
+  const counterEl = document.getElementById("counter");
+  const frontText = document.getElementById("frontText");
+  const backText = document.getElementById("backText");
+  const frontMeta = document.getElementById("frontMeta");
+  const backMeta = document.getElementById("backMeta");
+  const frontHint = document.getElementById("frontHint");
+  const backHint = document.getElementById("backHint");
+
+  const prevBtnFront = document.getElementById("prevBtnFront");
+  const nextBtnFront = document.getElementById("nextBtnFront");
+  const flipBtnFront = document.getElementById("flipBtnFront");
+  const flipBtnBack = document.getElementById("flipBtnBack");
+
+  const shuffleBtn = document.getElementById("shuffleBtn");
+  const resetBtn = document.getElementById("resetBtn");
+
+  const learnMoreLink = document.getElementById("learnMoreLink");
+  const altLink = document.getElementById("altLink");
+
+  const searchInput = document.getElementById("search");
+  const studyModeInput = document.getElementById("studyMode");
+
+  const markLearnedBtn = document.getElementById("markLearnedBtn");
+  const unmarkLearnedBtn = document.getElementById("unmarkLearnedBtn");
+  const statsEl = document.getElementById("stats");
+
+  const exportBtn = document.getElementById("exportBtn");
+  const importBtn = document.getElementById("importBtn");
+  const importFile = document.getElementById("importFile");
+
+  // ---------- Persistence ----------
+  function loadProgress() {
+    try {
+      const raw = localStorage.getItem(PROGRESS_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.learned)) learned = new Set(data.learned);
+    } catch (e) {
+      console.warn("Progress load failed:", e);
+    }
+  }
+
+  function saveProgress() {
+    try {
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify({
+        learned: Array.from(learned).sort((a,b)=>a.localeCompare(b))
+      }));
+    } catch (e) {
+      console.warn("Progress save failed:", e);
+    }
+  }
+
+  // ---------- Deck ops ----------
+  function buildDeck() {
+    deck = RAW_CARDS.map((c, i) => {
+      const term = (c.term || "").trim();
+      const definition = (c.definition || "").trim();
+      return {
+        id: `${i}:${term}`,
+        term,
+        definition,
+        primaryUrl: litchartsUrlFor(term),
+        altUrl: altUrlFor(term),
+      };
+    });
+    filtered = deck.slice();
+    idx = 0;
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  function applyFilters() {
+    const q = searchInput.value.trim().toLowerCase();
+    filtered = deck.filter(card => {
+      const matches = !q || card.term.toLowerCase().includes(q);
+      const learnedOk = !studyMode || !learned.has(card.id);
+      return matches && learnedOk;
+    });
+
+    if (filtered.length === 0) {
+      idx = 0;
+      renderEmpty();
+      return;
+    }
+
+    idx = clamp(idx, 0, filtered.length - 1);
+    render();
+  }
+
+  // ---------- Render ----------
+  function setFlipped(isFlipped) {
+    flashcardEl.classList.toggle("flipped", !!isFlipped);
+  }
+
+  function renderEmpty() {
+    setFlipped(false);
+    counterEl.textContent = `0 / 0`;
+    frontText.textContent = "No cards match your filter.";
+    backText.textContent = "Try clearing the search or toggling Study mode off.";
+    frontMeta.textContent = "";
+    backMeta.textContent = "";
+    frontHint.textContent = "";
+    backHint.textContent = "";
+    learnMoreLink.href = "https://www.litcharts.com/literary-devices-and-terms";
+    altLink.href = "https://en.wikipedia.org/wiki/Literary_device";
+    updateStats();
+  }
+
+  function render() {
+    const card = filtered[idx];
+    const learnedFlag = learned.has(card.id);
+
+    counterEl.textContent = `${idx + 1} / ${filtered.length}`;
+
+    frontText.textContent = card.definition;
+    backText.textContent = card.term;
+
+    frontMeta.textContent = learnedFlag ? "✅ Learned" : "Not learned yet";
+    backMeta.textContent = learnedFlag ? "✅ Learned" : "Not learned yet";
+
+    frontHint.textContent = "Click the card (or press Space) to reveal the term.";
+    backHint.textContent = "Use Learn more for LitCharts. If it doesn’t exist, use Alternate source.";
+
+    learnMoreLink.href = card.primaryUrl;
+    altLink.href = card.altUrl;
+
+    updateStats();
+  }
+
+  function updateStats() {
+    const total = deck.length;
+    const learnedCount = learned.size;
+    const remaining = total - learnedCount;
+
+    const showing = filtered.length;
+    statsEl.innerHTML = `
+      <div><b>Total cards:</b> ${total}</div>
+      <div><b>Learned:</b> ${learnedCount}</div>
+      <div><b>Remaining:</b> ${remaining}</div>
+      <div><b>Showing now:</b> ${showing}</div>
+      <div style="margin-top:6px;color:rgba(255,255,255,0.62)">
+        Shortcuts: <span class="kbd">Space</span> flip · <span class="kbd">←</span>/<span class="kbd">→</span> prev/next · <span class="kbd">S</span> shuffle
+      </div>
+    `;
+  }
+
+  // ---------- Actions ----------
+  function next() {
+    if (filtered.length === 0) return;
+    idx = (idx + 1) % filtered.length;
+    setFlipped(false);
+    render();
+  }
+
+  function prev() {
+    if (filtered.length === 0) return;
+    idx = (idx - 1 + filtered.length) % filtered.length;
+    setFlipped(false);
+    render();
+  }
+
+  function flip() {
+    if (filtered.length === 0) return;
+    flashcardEl.classList.toggle("flipped");
+  }
+
+  function markLearned() {
+    if (filtered.length === 0) return;
+    learned.add(filtered[idx].id);
+    saveProgress();
+    applyFilters();
+  }
+
+  function unmarkLearned() {
+    if (filtered.length === 0) return;
+    learned.delete(filtered[idx].id);
+    saveProgress();
+    applyFilters();
+  }
+
+  function resetProgress() {
+    learned = new Set();
+    saveProgress();
+    applyFilters();
+  }
+
+  function exportProgress() {
+    const data = {
+      learned: Array.from(learned),
+      exportedAt: new Date().toISOString(),
+      totalCards: deck.length
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "literary-flashcards-progress.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function importProgressFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (Array.isArray(data.learned)) {
+          learned = new Set(data.learned);
+          saveProgress();
+          applyFilters();
+        } else {
+          alert("That JSON file doesn't look like a flashcards progress export.");
+        }
+      } catch (e) {
+        alert("Could not read that JSON file.");
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ---------- Event wiring ----------
+  flashcardEl.addEventListener("click", flip);
+  flipBtnFront.addEventListener("click", (e) => { e.stopPropagation(); flip(); });
+  flipBtnBack.addEventListener("click", (e) => { e.stopPropagation(); flip(); });
+
+  nextBtnFront.addEventListener("click", (e) => { e.stopPropagation(); next(); });
+  prevBtnFront.addEventListener("click", (e) => { e.stopPropagation(); prev(); });
+
+  shuffleBtn.addEventListener("click", () => {
+    shuffle(deck);
+    applyFilters();
+    setFlipped(false);
+  });
+
+  resetBtn.addEventListener("click", () => {
+    if (confirm("Reset learned progress?")) resetProgress();
+  });
+
+  searchInput.addEventListener("input", () => {
+    idx = 0;
+    applyFilters();
+  });
+
+  studyModeInput.addEventListener("change", () => {
+    studyMode = !!studyModeInput.checked;
+    idx = 0;
+    applyFilters();
+  });
+
+  markLearnedBtn.addEventListener("click", markLearned);
+  unmarkLearnedBtn.addEventListener("click", unmarkLearned);
+
+  exportBtn.addEventListener("click", exportProgress);
+  importBtn.addEventListener("click", () => importFile.click());
+  importFile.addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) importProgressFromFile(file);
+    importFile.value = "";
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === " " || e.code === "Space") {
+      e.preventDefault();
+      flip();
+    } else if (e.key === "ArrowRight") {
+      next();
+    } else if (e.key === "ArrowLeft") {
+      prev();
+    } else if (e.key.toLowerCase() === "s") {
+      shuffle(deck);
+      applyFilters();
+      setFlipped(false);
+    }
+  });
+
+  // ---------- Init ----------
+  buildDeck();
+  loadProgress();
+  applyFilters();
+</script>
+</body>
+</html>
